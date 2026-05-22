@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登入測試</title>
+<style>
+body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+.box { background: white; padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto; }
+input { display: block; width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+button { width: 100%; padding: 12px; background: #4d7252; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+#result { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; font-size: 14px; }
+.ok { background: #e8f5e9; color: #2e7d32; }
+.err { background: #ffebee; color: #c62828; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>Supabase 登入測試</h2>
+  <input type="text" id="u" placeholder="帳號" value="admin">
+  <input type="password" id="p" placeholder="密碼">
+  <button onclick="test()">測試登入</button>
+  <div id="result"></div>
+</div>
+<script>
+const URL = 'https://dwvvtfpulovvokeiytkp.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3dnZ0ZnB1bG92dm9rZWl5dGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDY4OTksImV4cCI6MjA5MTQ4Mjg5OX0.xdZ9t711m_5Uvd7np98-X0oZqhyQIpIyJjZPhOMIFGo';
+
+async function test() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value.trim();
+  const r = document.getElementById('result');
+  r.style.display = 'block';
+  r.className = '';
+  r.textContent = '查詢中...';
+
+  try {
+    const res = await fetch(URL + '/rest/v1/admin_accounts?username=eq.' + encodeURIComponent(u) + '&password=eq.' + encodeURIComponent(p) + '&is_active=eq.true', {
+      headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
+    });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      r.className = 'ok';
+      r.textContent = '✅ 登入成功！帳號：' + data[0].username + '，角色：' + (data[0].role || 'admin');
+    } else {
+      r.className = 'err';
+      r.textContent = '❌ 帳號或密碼錯誤（回傳 ' + JSON.stringify(data) + '）';
+    }
+  } catch(e) {
+    r.className = 'err';
+    r.textContent = '❌ 連線錯誤：' + e.message;
+  }
+}
+</script>
+</body>
+</html>
